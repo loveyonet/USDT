@@ -3,63 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>USDT OTC 报价系统（移动端优化）</title>
+<title>USDT OTC 报价系统（Grid专业版）</title>
 
 <style>
 body{
     background:#0f172a;
     color:#fff;
     font-family:Arial;
-    text-align:center;
     margin:0;
     padding:10px;
+    text-align:center;
 }
 
-/* ======================
-   🔥 自适应核心布局
-====================== */
-.row{
-    display:flex;
-    justify-content:center;
+/* =========================
+   🔥 核心布局：GRID系统
+========================= */
+.grid{
+    display:grid;
+
+    /* PC默认 4列 */
+    grid-template-columns: repeat(4, 1fr);
+
     gap:10px;
-    flex-wrap:wrap;
+    max-width:1200px;
+    margin:0 auto;
 }
 
 /* 卡片 */
 .box{
     background:#1e293b;
     padding:12px;
-    margin:6px;
     border-radius:10px;
-    display:inline-block;
-
-    /* 🔥 核心：自适应宽度 */
-    width:260px;
-    min-width:160px;
-    flex:1;
 }
 
-/* 输入优化 */
+/* 输入 */
 input, select{
     width:90%;
     padding:8px;
-    font-size:16px;
     border-radius:6px;
     border:none;
     text-align:center;
+    font-size:15px;
 }
 
-/* 数字显示 */
-.price{font-size:20px;color:#22c55e;}
+/* 数字 */
+.price{font-size:18px;color:#22c55e;}
 .big{font-size:22px;color:#38bdf8;}
 
-/* 顶部状态栏 */
+/* 顶部 */
 .topBar{
     background:#111827;
     padding:10px;
     margin-bottom:10px;
-    font-size:13px;
     border-radius:8px;
+    font-size:13px;
 }
 
 /* 按钮 */
@@ -73,21 +70,33 @@ button{
     font-weight:bold;
 }
 
-/* ======================
-   📱 手机端优化
-====================== */
-@media (max-width: 768px){
+/* =========================
+   📱 平板
+========================= */
+@media (max-width: 1024px){
+    .grid{
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
 
-    .box{
-        width:100%;
-        margin:5px 0;
+/* =========================
+   📱 手机（重点：仍然并列）
+========================= */
+@media (max-width: 768px){
+    .grid{
+        grid-template-columns: repeat(2, 1fr);
     }
 
     h1{font-size:20px;}
-    h2{font-size:18px;}
+    h2{font-size:16px;}
 
-    .price{font-size:18px;}
-    .big{font-size:20px;}
+    input, select{
+        font-size:14px;
+        padding:6px;
+    }
+
+    .price{font-size:16px;}
+    .big{font-size:18px;}
 }
 </style>
 </head>
@@ -96,14 +105,17 @@ button{
 
 <h1>USDT OTC 报价系统</h1>
 
+<!-- 顶部 -->
 <div class="topBar">
-⏳ 倒计时：<span id="countdown">3</span>秒 |
-🕒 最后刷新：<span id="lastUpdate">--</span> |
+⏳ 倒计时：<span id="countdown">3</span> |
+🕒 刷新：<span id="lastUpdate">--</span> |
 <button onclick="manualUpdate()">刷新</button>
 </div>
 
-<!-- 市场 -->
-<div class="row">
+<!-- =========================
+     市场区
+========================= -->
+<div class="grid">
 
 <div class="box" onclick="setLockPrice('upbit')">
 Upbit<br><div id="upbit" class="price">-</div>
@@ -120,30 +132,67 @@ Bithumb<br><div id="bithumb" class="price">-</div>
 
 </div>
 
-<h2>💱 韩币换U</h2>
-<div class="row">
-<div class="box">换钱所报价<br><input id="sellBroker" value="10"></div>
-<div class="box">换钱所价格<br><div id="sellBrokerPrice" class="price">-</div></div>
-<div class="box">你的报价<br><input id="sellMy" value="10"></div>
-<div class="box">客户报价<br><div id="sellFinal" class="price">-</div></div>
-</div>
-
+<!-- =========================
+     U换韩币
+========================= -->
 <h2>💱 U换韩币</h2>
-<div class="row">
-<div class="box">换钱所报价<br><input id="buyBroker" value="-10"></div>
-<div class="box">换钱所价格<br><div id="buyBrokerPrice" class="price">-</div></div>
-<div class="box">你的报价<br><input id="buyMy" value="-10"></div>
-<div class="box">客户报价<br><div id="buyFinal" class="price">-</div></div>
+<div class="grid">
+
+<div class="box">
+换钱所报价<br><input id="buyBroker" value="-10">
 </div>
 
+<div class="box">
+换钱所价格<br><div id="buyBrokerPrice" class="price">-</div>
+</div>
+
+<div class="box">
+你的报价<br><input id="buyMy" value="-10">
+</div>
+
+<div class="box">
+客户报价<br><div id="buyFinal" class="price">-</div>
+</div>
+
+</div>
+
+<!-- =========================
+     韩币换U
+========================= -->
+<h2>💱 韩币换U</h2>
+<div class="grid">
+
+<div class="box">
+换钱所报价<br><input id="sellBroker" value="10">
+</div>
+
+<div class="box">
+换钱所价格<br><div id="sellBrokerPrice" class="price">-</div>
+</div>
+
+<div class="box">
+你的报价<br><input id="sellMy" value="10">
+</div>
+
+<div class="box">
+客户报价<br><div id="sellFinal" class="price">-</div>
+</div>
+
+</div>
+
+
+<!-- =========================
+     客户交易
+========================= -->
 <h2>💰 客户交易</h2>
 
-<div class="row">
+<div class="grid">
+
 <div class="box">
 模式<br>
 <select id="mode">
-<option value="sell">韩币换U</option>
 <option value="buy">U换韩币</option>
+<option value="sell">韩币换U</option>
 </select>
 </div>
 
@@ -166,43 +215,29 @@ USDT<br>
 利润<br>
 <div id="profit" class="big">-</div>
 </div>
+
 </div>
 
 <script>
 
-// ===== 你的逻辑完全不动（只省略重复部分） =====
-
 let count = 3;
 let lock = false;
 let lastInput = "krw";
-let timer;
 
-function formatNum(num){
-    num = Number(num);
-    num = Math.round(num * 100) / 100;
-    if(num % 1 === 0) return num.toFixed(0);
-    return num.toFixed(2);
+/* ========= 格式统一 ========= */
+function fmt(n){
+    n = Number(n);
+    if(n % 1 === 0) return n.toFixed(0);
+    return n.toFixed(2);
 }
 
-function formatWan(num){
-    return formatNum(num/10000) + "万";
+function fmtWan(n){
+    let v = n/10000;
+    if(v % 1 === 0) return v.toFixed(0)+"万";
+    return v.toFixed(2)+"万";
 }
 
-function manualUpdate(){
-    count = 3;
-    update();
-}
-
-function setLockPrice(type){
-    if(type==="upbit") lockedPrice.value = upbit.innerText;
-    if(type==="bithumb") lockedPrice.value = bithumb.innerText;
-    update();
-}
-
-function getLockedPrice(){
-    return parseFloat(lockedPrice.value)||0;
-}
-
+/* ========= API ========= */
 async function getUpbit(){
     let r = await fetch("https://api.upbit.com/v1/ticker?markets=KRW-USDT");
     let d = await r.json();
@@ -215,53 +250,78 @@ async function getBithumb(){
     return parseFloat(d.data.closing_price);
 }
 
-// ===== 主逻辑（未改动，只优化显示） =====
+/* ========= 锁价 ========= */
+function setLockPrice(type){
+    if(type==="upbit") lockedPrice.value = upbit.innerText;
+    if(type==="bithumb") lockedPrice.value = bithumb.innerText;
+    update();
+}
+
+function getLocked(){
+    return parseFloat(lockedPrice.value)||0;
+}
+
+/* ========= 更新 ========= */
 async function update(){
 
     let u = await getUpbit();
     let b = await getBithumb();
 
-    upbit.innerText = formatNum(u);
-    bithumb.innerText = formatNum(b);
+    upbit.innerText = fmt(u);
+    bithumb.innerText = fmt(b);
 
-    let locked = getLockedPrice();
+    let locked = getLocked();
 
-    let sellFinalVal = locked + (parseFloat(sellBroker.value)||0) + (parseFloat(sellMy.value)||0);
-    let buyFinalVal  = locked + (parseFloat(buyBroker.value)||0) + (parseFloat(buyMy.value)||0);
+    let sellFinalVal = locked + (+sellBroker.value||0) + (+sellMy.value||0);
+    let buyFinalVal  = locked + (+buyBroker.value||0) + (+buyMy.value||0);
 
-    sellBrokerPrice.innerText = formatNum(locked + (parseFloat(sellBroker.value)||0));
-    sellFinal.innerText = formatNum(sellFinalVal);
+    sellBrokerPrice.innerText = fmt(locked + (+sellBroker.value||0));
+    sellFinal.innerText = fmt(sellFinalVal);
 
-    buyBrokerPrice.innerText = formatNum(locked + (parseFloat(buyBroker.value)||0));
-    buyFinal.innerText = formatNum(buyFinalVal);
+    buyBrokerPrice.innerText = fmt(locked + (+buyBroker.value||0));
+    buyFinal.innerText = fmt(buyFinalVal);
+
+    let krw = (+krwAmount.value||0)*10000;
+
+    if(!lock){
+        lock = true;
+
+        if(lastInput==="krw"){
+            usdtAmount.value = (krw / sellFinalVal).toFixed(2);
+        }else{
+            krwAmount.value = ((+usdtAmount.value * sellFinalVal)/10000).toFixed(2);
+        }
+
+        lock = false;
+    }
+
+    krw = (+krwAmount.value||0)*10000;
 
     let mode = modeEl.value;
-
-    let krw = (parseFloat(krwAmount.value)||0)*10000;
 
     let profitUSDT = 0;
     let profitKRW = 0;
 
     if(mode==="sell"){
         let user = krw / sellFinalVal;
-        let real = krw / (locked + (parseFloat(sellBroker.value)||0));
+        let real = krw / (locked + (+sellBroker.value||0));
 
         profitUSDT = real - user;
         profitKRW = profitUSDT * locked;
 
-        result.innerText = formatNum(user) + " USDT";
+        result.innerText = fmt(user)+" USDT";
 
     }else{
         let user = krw / buyFinalVal;
-        let real = krw / (locked + (parseFloat(buyBroker.value)||0));
+        let real = krw / (locked + (+buyBroker.value||0));
 
         profitUSDT = user - real;
         profitKRW = profitUSDT * locked;
 
-        result.innerText = formatWan(krw);
+        result.innerText = fmtWan(krw);
     }
 
-    profit.innerText = formatNum(profitUSDT) + " U / " + formatWan(profitKRW);
+    profit.innerText = fmt(profitUSDT)+" U / "+fmtWan(profitKRW);
 
     lastUpdate.innerText = new Date().toLocaleString();
 
@@ -269,7 +329,7 @@ async function update(){
     countdown.innerText = count;
 }
 
-// ===== DOM =====
+/* ========= DOM ========= */
 const sellBroker = document.getElementById("sellBroker");
 const sellMy = document.getElementById("sellMy");
 const buyBroker = document.getElementById("buyBroker");
@@ -289,7 +349,7 @@ const modeEl = document.getElementById("mode");
 const countdown = document.getElementById("countdown");
 const lastUpdate = document.getElementById("lastUpdate");
 
-// ===== input =====
+/* ========= events ========= */
 krwAmount.oninput = ()=>{ lastInput="krw"; update(); };
 usdtAmount.oninput = ()=>{ lastInput="usdt"; update(); };
 
@@ -298,15 +358,12 @@ usdtAmount.oninput = ()=>{ lastInput="usdt"; update(); };
     document.getElementById(id).oninput = update;
 });
 
-function startTimer(){
-    timer = setInterval(()=>{
-        count--;
-        countdown.innerText = count;
-        if(count<=0) update();
-    },1000);
-}
+setInterval(()=>{
+    count--;
+    countdown.innerText = count;
+    if(count<=0) update();
+},1000);
 
-startTimer();
 update();
 
 </script>
