@@ -1,372 +1,270 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>USDT OTC 报价系统（Grid专业版）</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USDT OTC 报价系统</title>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --accent: #38bdf8;
+            --success: #22c55e;
+            --warning: #fbbf24;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
 
-<style>
-body{
-    background:#0f172a;
-    color:#fff;
-    font-family:Arial;
-    margin:0;
-    padding:10px;
-    text-align:center;
-}
+        body {
+            background: var(--bg-main);
+            color: var(--text-main);
+            font-family: -apple-system, sans-serif;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-/* =========================
-   🔥 核心布局：GRID系统
-========================= */
-.grid{
-    display:grid;
+        .topBar {
+            background: #111827;
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: flex;
+            gap: 15px;
+            border: 1px solid #334155;
+        }
+        .topBar span { color: var(--accent); font-weight: bold; }
 
-    /* PC默认 4列 */
-    grid-template-columns: repeat(4, 1fr);
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 1100px;
+        }
 
-    gap:10px;
-    max-width:1200px;
-    margin:0 auto;
-}
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #334155;
+        }
 
-/* 卡片 */
-.box{
-    background:#1e293b;
-    padding:12px;
-    border-radius:10px;
-}
+        h2 { font-size: 1rem; margin: 0 0 15px 0; color: var(--accent); border-bottom: 1px solid #334155; padding-bottom: 8px;}
+        
+        .box { background: #2d3a4f; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 10px; }
+        .label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+        .price-display { font-size: 1.1rem; font-weight: bold; padding: 4px; border-radius: 4px; margin: 5px 0; }
+        
+        /* 价格层级颜色 */
+        .broker-res { background: rgba(251, 191, 36, 0.1); color: var(--warning); border: 1px solid rgba(251, 191, 36, 0.3); }
+        .final-res { background: rgba(34, 197, 94, 0.1); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .arrow { font-size: 12px; color: var(--text-muted); margin: 2px 0; }
 
-/* 输入 */
-input, select{
-    width:90%;
-    padding:8px;
-    border-radius:6px;
-    border:none;
-    text-align:center;
-    font-size:15px;
-}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        input, select {
+            width: 85%;
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1rem;
+        }
 
-/* 数字 */
-.price{font-size:18px;color:#22c55e;}
-.big{font-size:22px;color:#38bdf8;}
+        .highlight { color: var(--warning); font-size: 1.4rem; font-weight: bold; }
+        button { background: var(--success); border: none; border-radius: 4px; padding: 4px 12px; cursor: pointer; font-weight: bold; }
 
-/* 顶部 */
-.topBar{
-    background:#111827;
-    padding:10px;
-    margin-bottom:10px;
-    border-radius:8px;
-    font-size:13px;
-}
-
-/* 按钮 */
-button{
-    padding:6px 12px;
-    border-radius:6px;
-    border:none;
-    cursor:pointer;
-    background:#22c55e;
-    color:#000;
-    font-weight:bold;
-}
-
-/* =========================
-   📱 平板
-========================= */
-@media (max-width: 1024px){
-    .grid{
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* =========================
-   📱 手机（重点：仍然并列）
-========================= */
-@media (max-width: 768px){
-    .grid{
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    h1{font-size:20px;}
-    h2{font-size:16px;}
-
-    input, select{
-        font-size:14px;
-        padding:6px;
-    }
-
-    .price{font-size:16px;}
-    .big{font-size:18px;}
-}
-</style>
+        @media (max-width: 400px) { .container { grid-template-columns: 1fr; } }
+    </style>
 </head>
-
 <body>
 
-<h1>USDT OTC 报价系统</h1>
+<h1 style="font-size: 1.3rem; margin: 10px 0;">USDT OTC 报价系统</h1>
 
-<!-- 顶部 -->
 <div class="topBar">
-⏳ 倒计时：<span id="countdown">3</span> |
-🕒 刷新：<span id="lastUpdate">--</span> |
-<button onclick="manualUpdate()">刷新</button>
+    <div>⏳ <span><span id="countdown">3</span>s</span></div>
+    <div>🕒 <span id="lastUpdate">--</span></div>
+    <button onclick="update()">刷新</button>
 </div>
 
-<!-- =========================
-     市场区
-========================= -->
-<div class="grid">
+<div class="container">
+    <div class="card">
+        <h2>📊 实时基准价</h2>
+        <div class="grid-2">
+            <div class="box" onclick="setLockPrice('upbit')" style="cursor:pointer">
+                <div class="label">Upbit (点击锁定)</div>
+                <div id="upbit" class="price-display" style="color:var(--accent)">-</div>
+            </div>
+            <div class="box" onclick="setLockPrice('bithumb')" style="cursor:pointer">
+                <div class="label">Bithumb (点击锁定)</div>
+                <div id="bithumb" class="price-display" style="color:var(--accent)">-</div>
+            </div>
+        </div>
+        <div class="box">
+            <div class="label">锁定基准价</div>
+            <input id="lockedPrice" type="number" value="1450">
+        </div>
+    </div>
 
-<div class="box" onclick="setLockPrice('upbit')">
-Upbit<br><div id="upbit" class="price">-</div>
-</div>
+    <div class="card">
+        <h2>🛠 报价加点链</h2>
+        <div class="grid-2">
+            <div class="box">
+                <div class="label" style="color:var(--success)">韩币换U (卖U)</div>
+                <input id="sellBroker" type="number" value="10" placeholder="换钱所点数">
+                <div class="arrow">↓</div>
+                <div id="sellBrokerPrice" class="price-display broker-res">-</div>
+                <div class="arrow">↓ + 我的利润点</div>
+                <input id="sellMy" type="number" value="10" placeholder="我的利润">
+                <div class="arrow">↓</div>
+                <div id="sellFinalPrice" class="price-display final-res">-</div>
+            </div>
 
-<div class="box" onclick="setLockPrice('bithumb')">
-Bithumb<br><div id="bithumb" class="price">-</div>
-</div>
+            <div class="box">
+                <div class="label" style="color:var(--accent)">U换韩币 (买U)</div>
+                <input id="buyBroker" type="number" value="-10" placeholder="换钱所点数">
+                <div class="arrow">↓</div>
+                <div id="buyBrokerPrice" class="price-display broker-res">-</div>
+                <div class="arrow">↓ + 我的利润点</div>
+                <input id="buyMy" type="number" value="-10" placeholder="我的利润">
+                <div class="arrow">↓</div>
+                <div id="buyFinalPrice" class="price-display final-res">-</div>
+            </div>
+        </div>
+    </div>
 
-<div class="box">
-锁定价格<br>
-<input id="lockedPrice" value="1500">
-</div>
-
-</div>
-
-<!-- =========================
-     U换韩币
-========================= -->
-<h2>💱 U换韩币</h2>
-<div class="grid">
-
-<div class="box">
-换钱所报价<br><input id="buyBroker" value="-10">
-</div>
-
-<div class="box">
-换钱所价格<br><div id="buyBrokerPrice" class="price">-</div>
-</div>
-
-<div class="box">
-你的报价<br><input id="buyMy" value="-10">
-</div>
-
-<div class="box">
-客户报价<br><div id="buyFinal" class="price">-</div>
-</div>
-
-</div>
-
-<!-- =========================
-     韩币换U
-========================= -->
-<h2>💱 韩币换U</h2>
-<div class="grid">
-
-<div class="box">
-换钱所报价<br><input id="sellBroker" value="10">
-</div>
-
-<div class="box">
-换钱所价格<br><div id="sellBrokerPrice" class="price">-</div>
-</div>
-
-<div class="box">
-你的报价<br><input id="sellMy" value="10">
-</div>
-
-<div class="box">
-客户报价<br><div id="sellFinal" class="price">-</div>
-</div>
-
-</div>
-
-
-<!-- =========================
-     客户交易
-========================= -->
-<h2>💰 客户交易</h2>
-
-<div class="grid">
-
-<div class="box">
-模式<br>
-<select id="mode">
-<option value="buy">U换韩币</option>
-<option value="sell">韩币换U</option>
-</select>
-</div>
-
-<div class="box">
-KRW（万）<br>
-<input id="krwAmount" value="5000">
-</div>
-
-<div class="box">
-USDT<br>
-<input id="usdtAmount" value="1000">
-</div>
-
-<div class="box">
-结果<br>
-<div id="result" class="big">-</div>
-</div>
-
-<div class="box">
-利润<br>
-<div id="profit" class="big">-</div>
-</div>
-
+    <div class="card">
+        <h2>💰 交易计算器</h2>
+        <div class="grid-2">
+            <div class="box">
+                <div class="label">当前模式</div>
+                <select id="mode">
+                    <option value="sell">韩币换U</option>
+                    <option value="buy">U换韩币</option>
+                </select>
+            </div>
+            <div class="box">
+                <div class="label">执行价格</div>
+                <div id="finalPriceDisplay" class="highlight">-</div>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="box">
+                <div class="label">韩币金额 (万)</div>
+                <input id="krwAmount" type="number" value="5000">
+            </div>
+            <div class="box">
+                <div class="label">USDT 数量</div>
+                <input id="usdtAmount" type="number" value="1000">
+            </div>
+        </div>
+        <div class="box" style="margin-top:10px; border: 1px solid var(--accent); background: #1e293b;">
+            <div class="label">利润回报 (U / KRW)</div>
+            <div id="profit" style="color: #f472b6; font-weight: bold; font-size: 1.1rem;">-</div>
+        </div>
+    </div>
 </div>
 
 <script>
-
 let count = 3;
 let lock = false;
 let lastInput = "krw";
 
-/* ========= 格式统一 ========= */
-function fmt(n){
-    n = Number(n);
-    if(n % 1 === 0) return n.toFixed(0);
-    return n.toFixed(2);
+function formatNum(num) {
+    num = Number(num);
+    if (isNaN(num)) return "0";
+    return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2);
 }
 
-function fmtWan(n){
-    let v = n/10000;
-    if(v % 1 === 0) return v.toFixed(0)+"万";
-    return v.toFixed(2)+"万";
-}
+function formatWan(num) { return formatNum(num / 10000) + "万"; }
 
-/* ========= API ========= */
-async function getUpbit(){
-    let r = await fetch("https://api.upbit.com/v1/ticker?markets=KRW-USDT");
-    let d = await r.json();
-    return d[0].trade_price;
-}
-
-async function getBithumb(){
-    let r = await fetch("https://api.bithumb.com/public/ticker/USDT_KRW");
-    let d = await r.json();
-    return parseFloat(d.data.closing_price);
-}
-
-/* ========= 锁价 ========= */
-function setLockPrice(type){
-    if(type==="upbit") lockedPrice.value = upbit.innerText;
-    if(type==="bithumb") lockedPrice.value = bithumb.innerText;
+function setLockPrice(id) {
+    document.getElementById('lockedPrice').value = document.getElementById(id).innerText;
     update();
 }
 
-function getLocked(){
-    return parseFloat(lockedPrice.value)||0;
-}
+async function update() {
+    try {
+        const [ru, rb] = await Promise.all([
+            fetch("https://api.upbit.com/v1/ticker?markets=KRW-USDT").then(r => r.json()),
+            fetch("https://api.bithumb.com/public/ticker/USDT_KRW").then(r => r.json())
+        ]);
+        document.getElementById("upbit").innerText = formatNum(ru[0].trade_price);
+        document.getElementById("bithumb").innerText = formatNum(rb.data.closing_price);
+    } catch (e) {}
 
-/* ========= 更新 ========= */
-async function update(){
+    const locked = parseFloat(document.getElementById("lockedPrice").value) || 0;
+    
+    // 韩币换U链
+    const sB = parseFloat(document.getElementById("sellBroker").value) || 0;
+    const sM = parseFloat(document.getElementById("sellMy").value) || 0;
+    const sellBrokerPriceVal = locked + sB;
+    const sellFinalPriceVal = sellBrokerPriceVal + sM;
+    document.getElementById("sellBrokerPrice").innerText = formatNum(sellBrokerPriceVal);
+    document.getElementById("sellFinalPrice").innerText = formatNum(sellFinalPriceVal);
 
-    let u = await getUpbit();
-    let b = await getBithumb();
+    // U换韩币链
+    const bB = parseFloat(document.getElementById("buyBroker").value) || 0;
+    const bM = parseFloat(document.getElementById("buyMy").value) || 0;
+    const buyBrokerPriceVal = locked + bB;
+    const buyFinalPriceVal = buyBrokerPriceVal + bM;
+    document.getElementById("buyBrokerPrice").innerText = formatNum(buyBrokerPriceVal);
+    document.getElementById("buyFinalPrice").innerText = formatNum(buyFinalPriceVal);
 
-    upbit.innerText = fmt(u);
-    bithumb.innerText = fmt(b);
+    // 计算器
+    const mode = document.getElementById("mode").value;
+    const currentPrice = mode === "sell" ? sellFinalPriceVal : buyFinalPriceVal;
+    const currentBrokerPrice = mode === "sell" ? sellBrokerPriceVal : buyBrokerPriceVal;
+    
+    document.getElementById("finalPriceDisplay").innerText = formatNum(currentPrice);
 
-    let locked = getLocked();
+    let krw = (parseFloat(document.getElementById("krwAmount").value) || 0) * 10000;
+    let usdt = parseFloat(document.getElementById("usdtAmount").value) || 0;
 
-    let sellFinalVal = locked + (+sellBroker.value||0) + (+sellMy.value||0);
-    let buyFinalVal  = locked + (+buyBroker.value||0) + (+buyMy.value||0);
-
-    sellBrokerPrice.innerText = fmt(locked + (+sellBroker.value||0));
-    sellFinal.innerText = fmt(sellFinalVal);
-
-    buyBrokerPrice.innerText = fmt(locked + (+buyBroker.value||0));
-    buyFinal.innerText = fmt(buyFinalVal);
-
-    let krw = (+krwAmount.value||0)*10000;
-
-    if(!lock){
+    if (!lock) {
         lock = true;
-
-        if(lastInput==="krw"){
-            usdtAmount.value = (krw / sellFinalVal).toFixed(2);
-        }else{
-            krwAmount.value = ((+usdtAmount.value * sellFinalVal)/10000).toFixed(2);
+        if (lastInput === "krw") {
+            usdt = krw / currentPrice;
+            document.getElementById("usdtAmount").value = formatNum(usdt);
+        } else {
+            krw = usdt * currentPrice;
+            document.getElementById("krwAmount").value = formatNum(krw / 10000);
         }
-
         lock = false;
     }
 
-    krw = (+krwAmount.value||0)*10000;
-
-    let mode = modeEl.value;
-
-    let profitUSDT = 0;
-    let profitKRW = 0;
-
-    if(mode==="sell"){
-        let user = krw / sellFinalVal;
-        let real = krw / (locked + (+sellBroker.value||0));
-
-        profitUSDT = real - user;
-        profitKRW = profitUSDT * locked;
-
-        result.innerText = fmt(user)+" USDT";
-
-    }else{
-        let user = krw / buyFinalVal;
-        let real = krw / (locked + (+buyBroker.value||0));
-
-        profitUSDT = user - real;
-        profitKRW = profitUSDT * locked;
-
-        result.innerText = fmtWan(krw);
+    // 利润计算
+    let pU = 0;
+    if (mode === "sell") {
+        pU = (krw / currentBrokerPrice) - (krw / currentPrice);
+    } else {
+        pU = (krw / currentPrice) - (krw / currentBrokerPrice);
     }
-
-    profit.innerText = fmt(profitUSDT)+" U / "+fmtWan(profitKRW);
-
-    lastUpdate.innerText = new Date().toLocaleString();
-
+    document.getElementById("profit").innerText = `${formatNum(pU)} U / ${formatWan(pU * locked)}`;
+    
+    document.getElementById("lastUpdate").innerText = new Date().toLocaleTimeString();
     count = 3;
-    countdown.innerText = count;
 }
 
-/* ========= DOM ========= */
-const sellBroker = document.getElementById("sellBroker");
-const sellMy = document.getElementById("sellMy");
-const buyBroker = document.getElementById("buyBroker");
-const buyMy = document.getElementById("buyMy");
-
-const krwAmount = document.getElementById("krwAmount");
-const usdtAmount = document.getElementById("usdtAmount");
-
-const result = document.getElementById("result");
-const profit = document.getElementById("profit");
-
-const upbit = document.getElementById("upbit");
-const bithumb = document.getElementById("bithumb");
-const lockedPrice = document.getElementById("lockedPrice");
-const modeEl = document.getElementById("mode");
-
-const countdown = document.getElementById("countdown");
-const lastUpdate = document.getElementById("lastUpdate");
-
-/* ========= events ========= */
-krwAmount.oninput = ()=>{ lastInput="krw"; update(); };
-usdtAmount.oninput = ()=>{ lastInput="usdt"; update(); };
-
-["sellBroker","sellMy","buyBroker","buyMy","lockedPrice","mode"]
-.forEach(id=>{
-    document.getElementById(id).oninput = update;
+document.getElementById("krwAmount").addEventListener("input", () => { lastInput = "krw"; update(); });
+document.getElementById("usdtAmount").addEventListener("input", () => { lastInput = "usdt"; update(); });
+["sellBroker", "sellMy", "buyBroker", "buyMy", "lockedPrice", "mode"].forEach(id => {
+    document.getElementById(id).addEventListener("input", update);
 });
 
-setInterval(()=>{
+setInterval(() => {
     count--;
-    countdown.innerText = count;
-    if(count<=0) update();
-},1000);
+    document.getElementById("countdown").innerText = count;
+    if (count <= 0) update();
+}, 1000);
 
 update();
-
 </script>
-
 </body>
 </html>
