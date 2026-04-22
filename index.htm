@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>USDT OTC 报价系统（统一格式版）</title>
+
+<style>
+body{background:#0f172a;color:#fff;font-family:Arial;text-align:center;}
+.box{background:#1e293b;padding:15px;margin:10px;border-radius:10px;display:inline-block;width:260px;}
+input{width:140px;text-align:center;}
+.price{font-size:20px;color:#22c55e;}
+.big{font-size:24px;color:#38bdf8;}
+.row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
+.smallInput{width:120px;}
+
+.topBar{
+    background:#111827;
+    padding:12px;
+    margin-bottom:10px;
+    font-size:14px;
+}
+.topBar span{color:#38bdf8;margin:0 8px;}
+
+button{
+    padding:6px 12px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    background:#22c55e;
+    color:#000;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>USDT OTC 报价系统</h1>
+
+<div class="topBar">
+⏳ 倒计时：<span id="countdown">3</span>秒 |
+🕒 最后刷新：<span id="lastUpdate">--</span> |
+<button onclick="manualUpdate()">手动刷新</button>
+</div>
+
+<div class="row">
+
+<div class="box" onclick="setLockPrice('upbit')">
+Upbit<br><div id="upbit" class="price">-</div>
+</div>
+
+<div class="box" onclick="setLockPrice('bithumb')">
+Bithumb<br><div id="bithumb" class="price">-</div>
+</div>
+
+<div class="box">
+锁定价格<br>
+<input id="lockedPrice" value="1500">
+</div>
+
+</div>
+
+<h2>💱 U换韩币</h2>
+<div class="box">换钱所报价<br><input id="buyBroker" value="-10"></div>
+<div class="box">换钱所价格<br><div id="buyBrokerPrice" class="price">-</div></div>
+<div class="box">你的报价<br><input id="buyMy" value="-10"></div>
+<div class="box">客户报价<br><div id="buyFinal" class="price">-</div></div>
+
+<h2>💱 韩币换U</h2>
+<div class="box">换钱所报价<br><input id="sellBroker" value="10"></div>
+<div class="box">换钱所价格<br><div id="sellBrokerPrice" class="price">-</div></div>
+<div class="box">你的报价<br><input id="sellMy" value="10"></div>
+<div class="box">客户报价<br><div id="sellFinal" class="price">-</div></div>
+
+<h2>💰 客户交易计算</h2>
+
+<div class="box">
+模式<br>
+<select id="mode">
+<option value="buy">U换韩币</option>
+<option value="sell">韩币换U</option>
+</select>
+</div>
+
+<div class="box">
+KRW金额（万）<br>
+<input id="krwAmount" value="5000">
+</div>
+
+<div class="box">
+USDT数量<br>
+<input id="usdtAmount" value="1000">
+</div>
+
+<div class="box">
+结果<br>
+<div id="result" class="big">-</div>
+</div>
+
+<div class="box">
+利润<br>
+<div id="profit" class="big">-</div>
+</div>
+
+<script>
+
+let count = 3;
+let lock = false;
+let lastInput = "krw";
+let timer;
+
+// =========================
+// 🔥 统一格式函数（核心）
+// =========================
+function formatNum(num){
+    num = Number(num);
+
+    if (isNaN(num)) return "0";
+
+    // 去掉浮点误差
+    num = Math.round(num * 100) / 100;
+
+    if (num % 1 === 0) {
+        return num.toFixed(0);
+    } else {
+        return num.toFixed(2);
+    }
+}
+
+// =====================
+function formatWan(num){
+    return formatNum(num / 10000) + "万";
+}
+
+// =====================
+function manualUpdate(){
+    count = 3;
+    update();
+}
+
+// =====================
+function setLockPrice(type){
+    if(type==="upbit") lockedPrice.value = upbit.innerText;
+    if(type==="bithumb") lockedPrice.value = bithumb.innerText;
+
+    update();
+}
+
+function getLockedPrice(){
+    return parseFloat(lockedPrice.value)||0;
+}
+
+// =====================
+async function getUpbit(){
+    let r = await fetch("https://api.upbit.com/v1/ticker?markets=KRW-USDT");
+    let d = await r.json();
+    return d[0].trade_price;
+}
+
+async function getBithumb(){
+    let r = await fetch("https://api.bithumb.com/public/ticker/USDT_KRW");
+    let d = await r.json();
+    return parseFloat(d.data.closing_price);
+}
+
+// =====================
+async function update(){
+
+    let u = await getUpbit();
+    let b = await getBithumb();
+
+    upbit.innerText = formatNum(u);
+    bithumb.innerText = formatNum(b);
+
+    let locked = getLockedPrice();
+
+    let sellBroker = parseFloat(sellBrokerEl.value)||0;
+    let sellMy = parseFloat(sellMyEl.value)||0;
+
+    let buyBroker = parseFloat(buyBrokerEl.value)||0;
+    let buyMy = parseFloat(buyMyEl.value)||0;
+
+    let sellBrokerPriceVal = locked + sellBroker;
+    let sellFinalVal = locked + sellBroker + sellMy;
+
+    let buyBrokerPriceVal = locked + buyBroker;
+    let buyFinalVal = locked + buyBroker + buyMy;
+
+    sellBrokerPrice.innerText = formatNum(sellBrokerPriceVal);
+    sellFinal.innerText = formatNum(sellFinalVal);
+
+    buyBrokerPrice.innerText = formatNum(buyBrokerPriceVal);
+    buyFinal.innerText = formatNum(buyFinalVal);
+
+    let mode = modeEl.value;
+
+    let krw = (parseFloat(krwAmount.value)||0)*10000;
+    let usdt = parseFloat(usdtAmount.value)||0;
+
+    if(!lock){
+        lock = true;
+
+        if(lastInput==="krw"){
+            usdtAmount.value = formatNum(krw / (mode==="sell"?sellFinalVal:buyFinalVal));
+        }else{
+            krwAmount.value = formatNum((usdt * (mode==="sell"?sellFinalVal:buyFinalVal))/10000);
+        }
+
+        lock = false;
+    }
+
+    krw = (parseFloat(krwAmount.value)||0)*10000;
+
+    let profitUSDT = 0;
+    let profitKRW = 0;
+    let resultText = "";
+
+    if(mode==="sell"){
+        let userUSDT = krw / sellFinalVal;
+        let realUSDT = krw / sellBrokerPriceVal;
+
+        profitUSDT = realUSDT - userUSDT;
+        profitKRW = profitUSDT * locked;
+
+        resultText = formatNum(userUSDT) + " USDT";
+
+    }else{
+        let userUSDT = krw / buyFinalVal;
+        let realUSDT = krw / buyBrokerPriceVal;
+
+        profitUSDT = userUSDT - realUSDT;
+        profitKRW = profitUSDT * locked;
+
+        resultText = formatWan(krw);
+    }
+
+    result.innerText = resultText;
+    profit.innerText = formatNum(profitUSDT) + " U / " + formatWan(profitKRW);
+
+    let now = new Date();
+    lastUpdate.innerText =
+        now.getFullYear()+"-"+(now.getMonth()+1).toString().padStart(2,'0')+"-"+
+        now.getDate().toString().padStart(2,'0')+" "+
+        now.getHours().toString().padStart(2,'0')+":"+
+        now.getMinutes().toString().padStart(2,'0')+":"+
+        now.getSeconds().toString().padStart(2,'0');
+
+    count = 3;
+    countdown.innerText = count;
+}
+
+// =====================
+const sellBrokerEl = document.getElementById("sellBroker");
+const sellMyEl = document.getElementById("sellMy");
+const buyBrokerEl = document.getElementById("buyBroker");
+const buyMyEl = document.getElementById("buyMy");
+
+const krwAmount = document.getElementById("krwAmount");
+const usdtAmount = document.getElementById("usdtAmount");
+
+const result = document.getElementById("result");
+const profit = document.getElementById("profit");
+
+const upbit = document.getElementById("upbit");
+const bithumb = document.getElementById("bithumb");
+const lockedPrice = document.getElementById("lockedPrice");
+const modeEl = document.getElementById("mode");
+
+// =====================
+krwAmount.addEventListener("input", ()=>{ lastInput="krw"; update(); });
+usdtAmount.addEventListener("input", ()=>{ lastInput="usdt"; update(); });
+
+["sellBroker","sellMy","buyBroker","buyMy","lockedPrice","mode"]
+.forEach(id=>{
+    document.getElementById(id).addEventListener("input", update);
+});
+
+function startTimer(){
+    clearInterval(timer);
+
+    timer = setInterval(()=>{
+        count--;
+        countdown.innerText = count;
+
+        if(count<=0){
+            update();
+        }
+    },1000);
+}
+
+startTimer();
+update();
+
+</script>
+
+</body>
+</html>
