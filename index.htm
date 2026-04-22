@@ -115,16 +115,6 @@
     <div class="card">
         <h2>🛠 报价加点链</h2>
         <div class="grid-2">
-            <div class="box">
-                <div class="label" style="color:var(--success)">韩币换U (卖U)</div>
-                <input id="sellBroker" type="number" value="10" placeholder="换钱所点数">
-                <div class="arrow">↓</div>
-                <div id="sellBrokerPrice" class="price-display broker-res">-</div>
-                <div class="arrow">↓ + 我的利润点</div>
-                <input id="sellMy" type="number" value="10" placeholder="我的利润">
-                <div class="arrow">↓</div>
-                <div id="sellFinalPrice" class="price-display final-res">-</div>
-            </div>
 
             <div class="box">
                 <div class="label" style="color:var(--accent)">U换韩币 (买U)</div>
@@ -136,6 +126,17 @@
                 <div class="arrow">↓</div>
                 <div id="buyFinalPrice" class="price-display final-res">-</div>
             </div>
+			
+            <div class="box">
+                <div class="label" style="color:var(--success)">韩币换U (卖U)</div>
+                <input id="sellBroker" type="number" value="10" placeholder="换钱所点数">
+                <div class="arrow">↓</div>
+                <div id="sellBrokerPrice" class="price-display broker-res">-</div>
+                <div class="arrow">↓ + 我的利润点</div>
+                <input id="sellMy" type="number" value="10" placeholder="我的利润">
+                <div class="arrow">↓</div>
+                <div id="sellFinalPrice" class="price-display final-res">-</div>
+            </div>
         </div>
     </div>
 
@@ -145,8 +146,8 @@
             <div class="box">
                 <div class="label">当前模式</div>
                 <select id="mode">
-                    <option value="sell">韩币换U</option>
                     <option value="buy">U换韩币</option>
+                    <option value="sell">韩币换U</option>
                 </select>
             </div>
             <div class="box">
