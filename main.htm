@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTC 综合工作台 (可调节)</title>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --border-color: #334155;
+            --splitter-hover: #38bdf8;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: var(--bg-main);
+            overflow: hidden;
+            font-family: -apple-system, sans-serif;
+        }
+
+        .wrapper {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            flex-direction: row; /* PC端左右布局 */
+        }
+
+        iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            /* 解决拖动时鼠标滑入iframe导致事件丢失的问题 */
+            pointer-events: auto;
+        }
+
+        /* 拖动时的遮罩层，防止iframe截获鼠标事件 */
+        .dragging iframe {
+            pointer-events: none;
+        }
+
+        /* 左侧面板 */
+        #panel-left {
+            width: 400px; /* 初始宽度 */
+            min-width: 300px;
+            max-width: 800px;
+            height: 100%;
+        }
+
+        /* 分割线 (Splitter) */
+        #splitter {
+            width: 6px;
+            cursor: col-resize;
+            background: var(--border-color);
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        #splitter:hover, .dragging #splitter {
+            background: var(--splitter-hover);
+        }
+
+        /* 右侧面板 */
+        #panel-right {
+            flex: 1;
+            height: 100%;
+        }
+
+        /* 移动端适配 (모바일 최적화) */
+        @media (max-width: 900px) {
+            .wrapper {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+            #panel-left, #panel-right {
+                width: 100% !important;
+                flex: none;
+                height: 600px;
+            }
+            #splitter {
+                height: 8px;
+                width: 100%;
+                cursor: row-resize; /* 手机端如果需要也可以调高度，但通常建议固定 */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper" id="container">
+    <div id="panel-left">
+        <iframe src="index.htm" title="报价计算器"></iframe>
+    </div>
+
+    <div id="splitter"></div>
+
+    <div id="panel-right">
+        <iframe src="Trend.html" title="趋势监控"></iframe>
+    </div>
+</div>
+
+<script>
+    const splitter = document.getElementById('splitter');
+    const leftPanel = document.getElementById('panel-left');
+    const container = document.getElementById('container');
+    let isDragging = false;
+
+    splitter.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        container.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+
+        // 计算鼠标距离页面左侧的距离
+        let newWidth = e.clientX;
+
+        // 限制最小和最大宽度
+        if (newWidth > 300 && newWidth < 800) {
+            leftPanel.style.width = newWidth + 'px';
+        }
+    });
+
+    document.addEventListener('mouseup', function() {
+        if (isDragging) {
+            isDragging = false;
+            container.classList.remove('dragging');
+            document.body.style.cursor = 'default';
+        }
+    });
+</script>
+
+</body>
+</html>
